@@ -101,10 +101,44 @@ python -m ranklens.cli analyze "cordless impact driver" --url https://example.co
 Set `DATABASE_URL`, or the individual `POSTGRES_*` variables, whichever you prefer. An
 explicit `DATABASE_URL` wins.
 
+### Danish analysis
+
+`--country dk` uses Denmark (DataForSEO location code 2208) and defaults to
+Danish (`da`). Use `--language en` to override the language explicitly.
+
+```bash
+python -m ranklens.cli analyze "gulvlægger pris" --country dk --url https://example.dk/gulve
+```
+
+Keyword, corpus, semantic fallback and topical matching preserve Unicode letters
+(including æ, ø and å) and use Danish stopwords. Question headings recognize Danish
+starters. English Flesch measurements are omitted for non-English analyses rather
+than applying English formulas to Danish text. Report labels remain English.
+Unsupported DataForSEO country codes raise an error instead of silently using US results.
+
+### Use an existing SERP snapshot
+
+`--serp-file` accepts the `Serp` JSON model and makes no SERP-provider lookup.
+The keyword, country and language must match the request. This supports data
+exported from an existing research service without sharing its provider credentials.
+The snapshot contains `keyword`, `country`, `language`, `source`, and `items`;
+each item has `rank`, `url`, `domain`, and optionally `title`, `snippet`, `displayed_url`.
+Keep the capture timestamp and original archive reference with your export.
+
+```bash
+python -m ranklens.cli analyze "gulvlægger pris" --country dk --serp-file serp.json \
+  --no-store --no-funnel --no-entities --no-topical --no-ai
+```
+
+`--no-store` saves the self-contained HTML report without requiring PostgreSQL.
+It does not disable page fetching or optional enrichment. Disable those extra
+layers explicitly as shown above if you want a deterministic run with no extra
+provider calls. Imported SERP acquisition costs are not added to the new run cost.
+
 ### Run it with no LLM at all
 
 ```bash
-python -m ranklens.cli analyze "your keyword" --no-funnel --no-entities --no-topical
+python -m ranklens.cli analyze "your keyword" --no-funnel --no-entities --no-topical --no-ai
 ```
 
 ---
@@ -152,7 +186,7 @@ credentials.
 
 Runs with the full profile (entities + topical + funnel) commonly take **25 to 35 minutes**.
 Set your client's timeout accordingly — a short poll ceiling will time out a run that was
-going to succeed. A deterministic run with `--no-funnel --no-entities --no-topical` finishes
+going to succeed. A deterministic run with `--no-funnel --no-entities --no-topical --no-ai` finishes
 in a couple of minutes.
 
 ---

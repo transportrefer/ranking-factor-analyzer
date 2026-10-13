@@ -28,3 +28,6 @@ dependencies = [
 
 [tool.setuptools.packages.find]
 include = ["ranklens*"]
+
+[tool.setuptools.package-data]
+"ranklens.report" = ["templates/*.j2"]
