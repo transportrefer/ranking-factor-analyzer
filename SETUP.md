@@ -101,20 +101,37 @@ python -m ranklens.cli analyze "cordless impact driver" --url https://example.co
 Set `DATABASE_URL`, or the individual `POSTGRES_*` variables, whichever you prefer. An
 explicit `DATABASE_URL` wins.
 
-### Danish analysis
+### Multilingual analysis
 
-`--country dk` uses Denmark (DataForSEO location code 2208) and defaults to
-Danish (`da`). Use `--language en` to override the language explicitly.
+Select the search market with `--country` and override its conventional default
+language with `--language` when needed. For example:
 
 ```bash
 python -m ranklens.cli analyze "gulvlægger pris" --country dk --url https://example.dk/gulve
+python -m ranklens.cli analyze "pompe à chaleur" --country fr --url https://example.fr/chauffage
+python -m ranklens.cli analyze "isolation maison" --country ca --language fr
 ```
 
-Keyword, corpus, semantic fallback and topical matching preserve Unicode letters
-(including æ, ø and å) and use Danish stopwords. Question headings recognize Danish
-starters. English Flesch measurements are omitted for non-English analyses rather
-than applying English formulas to Danish text. Report labels remain English.
-Unsupported DataForSEO country codes raise an error instead of silently using US results.
+Country-level DataForSEO codes cover 64 markets across Europe, the Americas and
+the existing English-language markets. See `ranklens/markets.py` for the complete
+list. Defaults include da for Denmark, de for Germany, fr for France, es for
+Spain/Mexico, pt for Portugal/Brazil and nb for Norway. Explicit overrides are
+useful in multilingual countries such as Canada, Belgium and Switzerland.
+Unsupported countries raise an error instead of silently selecting US results.
+
+Keyword, corpus, semantic fallback and topical matching share Unicode-aware
+word handling. Bundled offline stopword lists cover 28 European languages plus
+the existing English rules. Question-heading detection uses localized starter
+words. Regional tags select base-language lexical rules; the chosen provider
+must also support any tag sent to it. See `ranklens/data/README.md` for the
+language list, attribution and limitations.
+
+This is support for SERP selection and lexical measurements. Report labels
+remain English, and the existing language-dependent trust/AI heuristics have
+not been comprehensively localized. English Flesch measurements are omitted
+for other languages. Stemming, compound splitting and advanced grammatical
+analysis are not implemented. Languages without bundled stopwords retain
+Unicode word handling and do not inherit English stopword filtering.
 
 ### Use an existing SERP snapshot
 

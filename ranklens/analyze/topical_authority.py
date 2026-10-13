@@ -30,7 +30,7 @@ from urllib.parse import urlsplit
 
 from ranklens.clients import llm
 from ranklens.clients.serp import fetch_serp
-from ranklens.language import stopwords, tokens
+from ranklens.language import normalize_text, stopwords, tokens
 from ranklens.clients.sitemap import fetch_inventory
 from ranklens.config import Settings, get_settings
 from ranklens.models import TopicalAuthorityReport, TopicalPage
@@ -118,11 +118,11 @@ class _Matcher:
         self.adjacent = [(t, p) for t in adjacent_terms if (p := _term_pattern(t, language))]
 
     def match_core(self, text: str) -> list[str]:
-        low = text.lower()
+        low = normalize_text(text)
         return [t for t, p in self.core if p.search(low)]
 
     def match_adjacent(self, text: str) -> list[str]:
-        low = text.lower()
+        low = normalize_text(text)
         return [t for t, p in self.adjacent if p.search(low)]
 
 
@@ -188,7 +188,8 @@ async def expand_topic(topic: str, settings: Settings, language: str = "en") -> 
         "You are an SEO topical-authority analyst. Given a page's core topic, you "
         "produce the cluster of search-term variations, synonyms and word-stem "
         "forms a search engine treats as the SAME topic, plus closely-related "
-        "supporting subtopics."
+        "supporting subtopics. "
+        f"Keep all topic terms in the query language ({language})."
     )
     user = (
         f'Core topic: "{topic}"\n\n'

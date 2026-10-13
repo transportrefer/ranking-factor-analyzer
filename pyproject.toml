@@ -31,3 +31,4 @@ include = ["ranklens*"]
 
 [tool.setuptools.package-data]
 "ranklens.report" = ["templates/*.j2"]
+"ranklens" = ["data/*.json", "data/*.txt", "data/*.md"]

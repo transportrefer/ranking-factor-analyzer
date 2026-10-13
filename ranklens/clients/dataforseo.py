@@ -12,21 +12,10 @@ import httpx
 
 from ranklens.config import Settings, get_settings
 from ranklens.models import Serp, SerpItem
+from ranklens.markets import COUNTRY_LOCATION
 
 BASE_URL = "https://api.dataforseo.com"
 
-# Supported Google location codes per 2-letter country. Unknown codes fail closed.
-COUNTRY_LOCATION: dict[str, int] = {
-    "us": 2840,
-    "au": 2036,
-    "gb": 2826,
-    "ca": 2124,
-    "de": 2276,
-    "fr": 2250,
-    "in": 2356,
-    "nz": 2554,
-    "dk": 2208,
-}
 
 
 def _location_code(country: str) -> int:

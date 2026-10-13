@@ -16,7 +16,7 @@ from urllib.parse import urljoin, urlsplit
 from bs4 import BeautifulSoup
 
 from ..keywords import split_sentences, word_count
-from ..language import QUESTION_WORDS, language_code
+from ..language import QUESTION_WORDS, language_code, tokens
 from .schema import schema_factors
 
 _EMAIL_RE = re.compile(r"[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}")
@@ -102,8 +102,11 @@ def extract_html_factors(
     clean_body_text = ""
     try:
         body_soup = BeautifulSoup(html, "lxml")
-        for tag in body_soup.find_all(_STRIP_TAGS + _CHROME_TAGS + ("head",)):
+        for tag in body_soup.find_all(_STRIP_TAGS + ("nav", "footer", "head")):
             tag.decompose()
+        for tag in body_soup.find_all("header"):
+            if not tag.find_parent(("main", "article")):
+                tag.decompose()
         for tag in body_soup.find_all(attrs={"role": _CHROME_ROLES_RE}):
             tag.decompose()
         clean_body_text = body_soup.get_text(" ", strip=True)
@@ -171,7 +174,8 @@ def extract_html_factors(
                 return False
             if tl.endswith("?"):
                 return True
-            first = tl.split()[0] if tl.split() else ""
+            words = tokens(tl)
+            first = words[0] if words else ""
             return first in QUESTION_WORDS.get(language_code(getattr(vset, "language", "en")), ())
 
         factors["QUESTIONS_H1"] = float(sum(1 for t in headings[1] if _is_question(t)))
